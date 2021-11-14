@@ -1,10 +1,66 @@
 require("dotenv").config();
 
-
+const Sequelize = require("sequelize");
 
 const {CONNECTION_STRING} = process.env;
 
+const sequelize = new Sequelize(CONNECTION_STRING,{
+    dialect: 'posgres',
+    dialectOptions: {
+        ssl: {
+            rejectUnauthorized: false
+        }
+    }
+});
+
 module.exports = {
+    getCountries: (req, res) => {
+        sequelize
+           .query(
+               `select * from countries;`
+           )
+           .then((dbRes) => res.status(200).send(dbRes[0]))
+           .catch((err) => console.log(err));
+    },
+
+   createCity: (req, res) => {
+       const {name, rating, countryId} 
+       = req.body
+       
+       sequelize
+           .query(
+               `INSERT INTO cities (name, rating, country_id) 
+             values ('${name}', '${rating}', '${countryId}');`
+           
+           )
+           .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
+   },
+
+   getCities: (req, res) => {
+       sequelize
+           .query(
+           `SELECT city.city_id, city.name AS city, city.rating, country.country_id, country.name AS country
+           FROM cities city
+           JOIN countries country
+           ON city.country_id = country.country_id
+           ORDER BY city.rating DESC
+           ; `
+           )
+           .then(dbRes => res.status(200).send(dbRes[0]))
+        .catch(err => console.log(err))
+   },
+   deleteCity: (req, res) => {
+       const 
+           cityId = req.params.id;
+           sequelize.query(`
+           DELETE FROM cities WHERE city_id = 
+           ${cityId};`
+       )
+       .then(dbRes => res.status(200).send(dbRes[0]))
+       .catch(err => console.log(err))
+   },
+
     seed: (req, res) => {
         sequelize.query(`
             drop table if exists cities;
@@ -15,7 +71,20 @@ module.exports = {
                 name varchar
             );
 
-            *****YOUR CODE HERE*****
+            create table cities (
+                city_id serial primary key,
+                name varchar(100),
+                rating integer,
+                country_id integer
+
+            );
+
+            insert into cities (name, rating, country_id)
+            values ('New Orleans', 5, 187),
+            ('Shreveport', 3, 187),
+            ('Campti', 1, 187),
+            ('Bossier City', 2, 187);
+            
 
             insert into countries (name)
             values ('Afghanistan'),
@@ -219,3 +288,4 @@ module.exports = {
         }).catch(err => console.log('error seeding DB', err))
     }
 }
+   
