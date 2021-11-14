@@ -8,5 +8,23 @@ def sales_reports(log_file): #defining  function sales_reports, with log_file as
         if day == "Mon":#if satement: day equals Monday (changed from Tuesday)
             print(line) # print whats in that line 
 
-
 sales_reports(log_file)#calling the function Sales_reports back with the paramater.
+
+
+
+def qty_reports(log_file):
+    for line in log_file:
+        split_line = line.split(" ")
+        qty = int(split_line[2])
+        if qty > 10:
+            print(line)
+
+qty_reports(log_file)
+
+print(qty_reports)
+
+
+
+
+
+
